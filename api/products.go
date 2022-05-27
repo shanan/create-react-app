@@ -4,7 +4,7 @@ package handler
 
 import (
 	"database/sql"
-	"fmt"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -38,7 +38,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var products []Product
-	rows, err := db.Query("SELECT * FROM Products")
+	rows, err := db.Query("SELECT * FROM products")
 	if err != nil {
 		log.Fatalf("failed to connect to PlanetScale: %v", err)
 	}
@@ -53,6 +53,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// 	return products, err
 	// }
 	// return products, nil
-	fmt.Fprintf(w, "%v", products)
+	js, err := json.Marshal(products)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
 
+	w.Write(js)
 }
