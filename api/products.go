@@ -18,15 +18,6 @@ type Product struct {
 	Name        string
 	Description string
 	Image       string
-	CategoryID  int
-	Category    Category `gorm:"foreignKey:CategoryID"`
-}
-
-// A Category describes a group of Products.
-type Category struct {
-	ID          int
-	Name        string
-	Description string
 }
 
 // getProducts is the HTTP handler for GET /products.
@@ -38,21 +29,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var products []Product
-	rows, err := db.Query("SELECT * FROM products")
+	rows, err := db.Query("SELECT ID, Name, Description, Image FROM products")
 	if err != nil {
 		log.Fatalf("failed to connect to PlanetScale: %v", err)
 	}
 	defer rows.Close()
 
-	// Loop through rows, using Scan to assign column data to struct fields.
 	for rows.Next() {
 		var product Product
+		if err := rows.Scan(&product.ID, &product.Name, &product.Description, &product.Image); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		products = append(products, product)
 	}
-	// if err = rows.Err(); err != nil {
-	// 	return products, err
-	// }
-	// return products, nil
+
 	js, err := json.Marshal(products)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
