@@ -43,12 +43,5 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		products = append(products, product)
 	}
 
-	js, err := json.Marshal(products)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-
-	w.Write(js)
+	json.NewEncoder(w).Encode(products)
 }
