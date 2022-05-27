@@ -52,7 +52,7 @@ export function Products(props) {
 
   const fetchProducts = async () => {
     const response = await axios
-      .get("https://create-react-app-shanan1.vercel.app/api/products")
+      .get("/api/products")
       .catch((err) => console.log(err));
 
     if (response) {
